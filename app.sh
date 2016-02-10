@@ -1,4 +1,4 @@
-CPPFLAGS="${CPPFLAGS} -I${DEST}/include"
+CPPFLAGS="${CPPFLAGS} -I${DEST}/include -I${DEST}/include/libxml2"
 CFLAGS="${CFLAGS:-} -ffunction-sections -fdata-sections"
 LDFLAGS="${LDFLAGS:-} -L${DEPS}/lib -Wl,--gc-sections"
 
@@ -11,7 +11,8 @@ local URL="http://rpm5.org/files/popt/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
-./configure --host="${HOST}" --prefix="${DEPS}" --disable-shared
+./configure --host="${HOST}" --prefix="${DEST}" \
+  --enable-static --disable-shared
 make
 make install
 popd
@@ -26,7 +27,7 @@ local URL="http://sourceforge.net/projects/e2fsprogs/files/e2fsprogs/v${VERSION}
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
-./configure --host="${HOST}" --prefix="${DEPS}" \
+./configure --host="${HOST}" --prefix="${DEST}" \
   --disable-elf-shlibs --disable-quota
 cd lib/uuid
 make -j1
@@ -43,7 +44,8 @@ local URL="http://www.lttng.org/files/urcu/${FILE}"
 
 _download_bz2 "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
-./configure --host="${HOST}" --prefix="${DEPS}" --disable-shared \
+./configure --host="${HOST}" --prefix="${DEST}" \
+  --enable-static --disable-shared \
   LIBS="-lrt" \
   ac_cv_func_malloc_0_nonnull=yes \
   ac_cv_func_realloc_0_nonnull=yes
@@ -62,7 +64,8 @@ local URL="ftp://xmlsoft.org/libxml2/${FILE}"
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
 PATH=$DEPS/bin:$PATH \
-  ./configure --host="${HOST}" --prefix="${DEPS}" --disable-shared \
+  ./configure --host="${HOST}" --prefix="${DEST}" \
+    --enable-static --disable-shared \
     --without-iconv --without-icu --without-python --without-zlib
 make
 make install
@@ -78,7 +81,8 @@ local URL="http://lttng.org/files/lttng-ust/${FILE}"
 
 _download_bz2 "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
-./configure --host="${HOST}" --prefix="${DEST}"
+./configure --host="${HOST}" --prefix="${DEST}" \
+  --enable-static --enable-shared
 make
 make install
 popd
@@ -94,8 +98,10 @@ local URL="http://lttng.org/files/lttng-tools/${FILE}"
 _download_bz2 "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
 PKG_CONFIG_PATH="${DEPS}/lib/pkgconfig:${DEST}/lib/pkgconfig" \
-  ./configure --host="${HOST}" --prefix="${DEST}" --disable-shared \
-    --with-xml-prefix="${DEPS}" --with-lttng-ust-prefix="${DEPS}"
+  ./configure --host="${HOST}" --prefix="${DEST}" \
+    --enable-static --disable-shared \
+    --with-xml-prefix="${DEPS}" --with-lttng-ust-prefix="${DEPS}" \
+    LIBS="-lxml2"
 make
 make install
 popd
@@ -110,7 +116,7 @@ local URL="http://lttng.org/files/lttng-modules/${FILE}"
 
 export ARCH="arm"
 export CROSS_COMPILE="${HOST}-"
-export KERNELDIR="${KERNELDIR:-${HOME}/build/kernel-drobo64/kernel}"
+export KERNELDIR="${KERNELDIR:-${HOME}/build/kernel-drobo5n/kernel}"
 export LDFLAGS=""
 
 _download_bz2 "${FILE}" "${URL}" "${FOLDER}"
